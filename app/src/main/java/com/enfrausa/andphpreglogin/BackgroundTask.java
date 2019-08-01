@@ -25,14 +25,16 @@ public class BackgroundTask extends AsyncTask<String, String, String> {
     @Override
     protected String doInBackground(String... strings) {
         String type = strings[0];
-        String name = strings[1];
-        String address = strings[2];
-        String email = strings[3];
-        String username = strings[4];
-        String password = strings[5];
+        String loginURL = "http://192.168.10.134:8000/employee101/login.php";
         String regURL = "http://192.168.10.134:8000/employee101/connection.php";
-
         if (type.equals("reg")) {
+
+            String name = strings[1];
+            String address = strings[2];
+            String email = strings[3];
+            String username = strings[4];
+            String password = strings[5];
+
             try {
                 URL url = new URL(regURL);
                 try {
@@ -59,6 +61,45 @@ public class BackgroundTask extends AsyncTask<String, String, String> {
                     String line = "";
                     StringBuilder stringBuilder = new StringBuilder();
                     while ((line=bufferedReader.readLine()) !=null) {
+                        stringBuilder.append(line).append("\n");
+                    }
+                    result = stringBuilder.toString();
+                    bufferedReader.close();
+                    inputStream.close();
+                    httpURLConnection.disconnect();
+                    return result;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        } else if (type.equals("login")) {
+            String user_name = strings[1];
+            String pass_word = strings[2];
+
+            try {
+                URL url = new URL(loginURL);
+                try {
+                    HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+                    httpURLConnection.setRequestMethod("POST");
+                    httpURLConnection.setDoOutput(true);
+                    httpURLConnection.setDoInput(true);
+                    OutputStream outputStream = httpURLConnection.getOutputStream();
+                    OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, "UTF-8");
+                    BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+                    String login_data = URLEncoder.encode("username", "UTF-8") + "=" + URLEncoder.encode(user_name, "UTF-8") +
+                            "&" + URLEncoder.encode("password", "UTF-8") + "=" + URLEncoder.encode(pass_word, "UTF-8");
+                    bufferedWriter.write(login_data);
+                    bufferedWriter.flush();
+                    bufferedWriter.close();
+                    InputStream inputStream = httpURLConnection.getInputStream();
+                    InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "ISO-8859-1");
+                    BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                    String result = "";
+                    String line = "";
+                    StringBuilder stringBuilder = new StringBuilder();
+                    while ((line = bufferedReader.readLine()) != null) {
                         stringBuilder.append(line).append("\n");
                     }
                     result = stringBuilder.toString();
